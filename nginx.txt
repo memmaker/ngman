@@ -1,0 +1,91 @@
+{{define "static"}}
+    location {{ .URLLocation }} {
+        root {{ .RootPath }};
+        expires 30d;
+    }
+{{ end }}
+
+{{define "proxy"}}
+    location {{ .URLLocation }} {
+      proxy_pass {{ .Endpoint }};
+      {{ range $key, $value := .Headers }}proxy_set_header {{ $key }} {{ $value }};
+      {{ end }}
+      proxy_pass_header Authorization;
+      proxy_http_version 1.1;
+    }
+{{ end }}
+
+{{ define "php-fpm-support" }}
+    location ~ ^(.+\.php)(.*)$ {
+      try_files $fastcgi_script_name =404;
+      include        /etc/nginx/fastcgi_params;
+      fastcgi_split_path_info  ^(.+\.php)(.*)$;
+      fastcgi_pass   unix:/var/run/php/php-fpm.sock;
+      fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+      fastcgi_param  PATH_INFO        $fastcgi_path_info;
+    }
+{{ end }}
+{{ define "nginx" }}
+server {
+    index index.html;
+    server_name {{ .Site.Domain }};
+    {{ if .Site.RootPath }}
+    root {{ .Site.RootPath }};
+    {{ end }}
+
+{{ range $rewriteRule := .Site.Rewrites }}
+    rewrite {{ $rewriteRule }};
+{{ end }}
+
+    charset utf-8;
+
+{{ range $option := .Site.MiscOptions }}
+    {{ $option }};
+{{ end }}
+
+    location ~ /(\.ht) {
+      deny all;
+      return 404;
+    }
+
+    ### SSL Configuration
+    listen [::]:443 ssl http2;
+    listen 443 ssl http2;
+{{ if .Site.UseWildcardCert }}
+    ssl_certificate_key {{ .Config.CertificateRootPath }}/{{ getWildcardName .Site.Domain }}.key;
+    ssl_certificate {{ .Config.CertificateRootPath }}/{{ getWildcardName .Site.Domain }}.crt;
+{{ else }}
+    ssl_certificate_key {{ .Config.CertificateRootPath }}/{{ .Site.Domain }}.key;
+    ssl_certificate {{ .Config.CertificateRootPath }}/{{ .Site.Domain }}.crt;
+{{ end }}
+
+    ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+{{ if .Site.UseChunk }}
+{{ getChunk .Site.Domain }}
+{{ end }}
+
+{{ range $index, $location := .Site.StaticLocations }}
+    {{ template "static" $location }}
+{{ end }}
+
+{{ range $index, $location := .Site.ProxyLocations }}
+    {{ template "proxy" $location }}
+{{ end }}
+
+{{ if .Site.UsePHP }}
+    {{ template "php-fpm-support" . }}
+{{ end }}
+}
+server {
+    if ($host = {{ .Site.Domain }}) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80 http2;
+    listen [::]:80 http2;
+    server_name {{ .Site.Domain }};
+    return 404;
+}
+{{ end }}
