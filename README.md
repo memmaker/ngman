@@ -2,6 +2,8 @@
 
 A simple CLI tool for managing nginx sites.
 
+**Homepage:** https://textzentrisch.de/pages/ngman/
+
 ## Concept
 
 The configuration and state of this tool is kept under its config directory.
@@ -43,6 +45,21 @@ You can then do something like this
     }
 
 Which will create a command as expected by **ngman**, where you just have to provide a domain name as argument.
+
+## Installation
+
+    ARCH=darwin_amd64;
+    mkdir ~/.ngman > /dev/null 2>&1;
+    pushd;
+    cd ~/.ngman && \
+    wget https://github.com/memmaker/ngman/releases/latest/download/nginx.txt && \
+    wget https://github.com/memmaker/ngman/releases/latest/download/ngman_${ARCH}.zip && \ 
+    unzip ngman_${ARCH}.zip && rm ngman_${ARCH}.zip && \
+    mv ngman_${ARCH} /usr/local/bin/ngman && popd
+
+## Uninstall
+
+    rm -rf ~/.ngman && rm /usr/local/bin/ngman
 
 ## Usage
 
