@@ -58,7 +58,7 @@ func editSite(domain string) {
 	if editor == "" {
 		editor = "nano"
 	}
-	cmd := exec.Command(editor, config.SiteStorageDirectory+"/"+domain+".json")
+	cmd := exec.Command(editor, config.SiteStorageDirectory+"/"+domain+".toml")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -99,7 +99,7 @@ func writeAll() {
 }
 
 func deleteSite(domain string) {
-	try(os.Remove(config.SiteStorageDirectory + "/" + domain + ".json"))
+	try(os.Remove(config.SiteStorageDirectory + "/" + domain + ".toml"))
 	try(os.Remove(config.NginxSiteConfigDirectory + "/" + domain + ".conf"))
 }
 

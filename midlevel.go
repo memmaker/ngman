@@ -2,9 +2,9 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/pelletier/go-toml/v2"
 	"io/fs"
 	"log"
 	"os"
@@ -24,11 +24,11 @@ func getAllSites() []SiteInfo {
 			continue
 		}
 		siteFilename := file.Name()
-		if !strings.HasSuffix(siteFilename, ".json") {
-			continue
+		var domainOfSite string
+		if strings.HasSuffix(siteFilename, ".toml") {
+			domainOfSite = strings.TrimSuffix(siteFilename, ".toml")
+			sites = append(sites, getSiteByDomain(domainOfSite))
 		}
-		domainOfSite := strings.TrimSuffix(siteFilename, ".json")
-		sites = append(sites, getSiteByDomain(domainOfSite))
 	}
 	return sites
 }
@@ -44,14 +44,14 @@ func chunkExists(domain string) bool {
 }
 
 func getSiteByDomain(domain string) SiteInfo {
-	jsonString := readFile(config.SiteStorageDirectory + "/" + domain + ".json")
+	tomlString := readFile(config.SiteStorageDirectory + "/" + domain + ".toml")
 	var siteinfo SiteInfo
-	try(json.Unmarshal([]byte(jsonString), &siteinfo))
+	try(toml.Unmarshal([]byte(tomlString), &siteinfo))
 	return siteinfo
 }
 
 func siteExists(domain string) bool {
-	_, err := os.Stat(config.SiteStorageDirectory + "/" + domain + ".json")
+	_, err := os.Stat(config.SiteStorageDirectory + "/" + domain + ".toml")
 	return !os.IsNotExist(err)
 }
 
@@ -109,9 +109,9 @@ func updateSite(siteinfo SiteInfo) {
 }
 
 func writeSiteInfo(siteinfo SiteInfo) {
-	// marshal the siteinfo to json
-	jsonString := must(json.MarshalIndent(siteinfo, "", "  "))
-	try(writeFile(config.SiteStorageDirectory+"/"+siteinfo.Domain+".json", jsonString))
+	// marshal the siteinfo to toml
+	tomlString := must(toml.Marshal(siteinfo))
+	try(writeFile(config.SiteStorageDirectory+"/"+siteinfo.Domain+".toml", tomlString))
 }
 func writeNginxConfig(site SiteInfo) {
 	context := RenderContext{
@@ -127,7 +127,7 @@ func loadConfig() {
 	homeDir := must(os.UserHomeDir())
 	configDir := homeDir + "/.ngman"
 	ensureDirExists(configDir)
-	configFilename := configDir + "/config.json"
+	configFilename := configDir + "/config.toml"
 	if !fileExists(configFilename) {
 		config = GlobalConfig{
 			SiteStorageDirectory:     configDir + "/sites",
@@ -137,12 +137,12 @@ func loadConfig() {
 			GenerateCertCommand:      "",
 			CertificateRootPath:      "/ssl/certificates",
 		}
-		// to json
-		jsonString := must(json.MarshalIndent(config, "", "  "))
-		try(writeFile(configFilename, jsonString))
+
+		tomlString := must(toml.Marshal(config))
+		try(writeFile(configFilename, tomlString))
 	} else {
-		jsonString := readFile(configFilename)
-		try(json.Unmarshal([]byte(jsonString), &config))
+		tomlString := readFile(configFilename)
+		try(toml.Unmarshal([]byte(tomlString), &config))
 	}
 }
 

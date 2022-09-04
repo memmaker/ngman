@@ -14,6 +14,7 @@ A site can have multiple static and proxy locations.
 
 The configuration and state of this tool is kept under its config directory.
 By default, that is **"~/.ngman/"** and the tool will create it on first start.
+I am using [TOML](https://github.com/toml-lang/toml) as the configuration format.
 
 The config directory also needs to contain **"nginx.txt"**, the file with all the partial templates.
 You can easily adapt that file to your needs to adjust the nginx configurations created.
@@ -22,18 +23,16 @@ For every site that it manages the tool will create a file in the **~/.ngman/sit
 
 You can always re-create all the nginx config files by running **ngman write-all**.
 
-## Global settings (config.json) 
+## Global settings (config.toml) 
 
-Example config.json file in a production environment:
+Example config.toml file in a production environment:
 
-    {
-        "CertificateRootPath": "/ssl/certificates",
-        "SiteStorageDirectory": "/root/.ngman/sites",
-        "NginxSiteConfigDirectory": "/etc/nginx/sites-enabled",
-        "TemplateFile": "/root/.ngman/nginx.txt",
-        "PostRunCommand": "service nginx reload",
-        "GenerateCertCommand": "create_ssl_cert"
-    }
+    CertificateRootPath = '/ssl/certificates'
+    SiteStorageDirectory = '/root/.ngman/sites'
+    NginxSiteConfigDirectory = '/etc/nginx/sites-enabled'
+    TemplateFile = '/root/.ngman/nginx.txt'
+    PostRunCommand = 'service nginx reload'
+    GenerateCertCommand = 'create_ssl_cert'
 
 ### CertificateRootPath
 
@@ -45,7 +44,7 @@ The files are expected to conform to the following naming scheme:
 
 ### SiteStorageDirectory
 
-The path to the directory where the JSON site configuration files are stored. 
+The path to the directory where the TOML site configuration files are stored. 
 Must be writable by the user executing the tool.
 
 ### NginxSiteConfigDirectory
@@ -127,17 +126,15 @@ You can add the key UsePHP to a site config to enable PHP-FPM support.
 
 Example:
 
-    {
-        "Domain": "example.com",
-        "UsePHP": true,
-        "RootPath": "/var/www/example.com"
-    }
+    Domain = 'example.org'
+    RootPath = '/var/www/example'
+    UsePHP = true # <-- this is the important part
 
 ngman will then insert the template called **"php-fpm-support"** from the **"nginx.txt"** file into the nginx configuration of that site.
 
 ### Misc. Options
 
-The JSON files for the site configuration also allow adding an array of
+The TOML files for the site configuration also allow adding an array of
 miscellaneous options to the nginx config file.
 
 Every string to be found in the array called **"MiscOptions"** in a site configuration
@@ -145,16 +142,16 @@ will be inserted as a single line into the nginx config file.
 
 Example:
 
-    {
-        "Domain": "example.com",
-        "RootPath": "/var/www/example.com",
-        "MiscOptions": [
-            "gzip on;",
-            "gzip_disable "msie6";",
-            "gzip_vary on;",
-            "gzip_proxied any;"
-        ]
-    }
+    Domain = 'example.com'
+    RootPath = '/var/www/example.com'
+    MiscOptions = [
+        'gzip on',
+        'gzip_disable "msie6"',
+        'gzip_vary on',
+        'gzip_proxied any'
+    ]
+
+**Note:** The semicolon is appended automatically in the config template.
 
 ### Chunks
 
