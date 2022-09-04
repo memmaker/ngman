@@ -33,10 +33,6 @@ server {
     root {{ .Site.RootPath }};
     {{ end }}
 
-{{ range $rewriteRule := .Site.Rewrites }}
-    rewrite {{ $rewriteRule }};
-{{ end }}
-
     charset utf-8;
 
 {{ range $option := .Site.MiscOptions }}
@@ -62,7 +58,7 @@ server {
     ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-{{ if .Site.UseChunk }}
+{{ if chunkExists .Site.Domain }}
 {{ getChunk .Site.Domain }}
 {{ end }}
 

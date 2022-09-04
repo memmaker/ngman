@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -34,6 +36,11 @@ func getAllSites() []SiteInfo {
 func getChunk(domain string) string {
 	chunkString := readFile(config.SiteStorageDirectory + "/chunks/" + domain)
 	return chunkString
+}
+
+func chunkExists(domain string) bool {
+	_, err := os.Stat(config.SiteStorageDirectory + "/chunks/" + domain)
+	return !errors.Is(err, fs.ErrNotExist)
 }
 
 func getSiteByDomain(domain string) SiteInfo {
@@ -157,5 +164,5 @@ func renderTemplate(data RenderContext) []byte {
 }
 
 func loadTemplates() {
-	rootTemplate = template.Must(template.New("nginx").Funcs(template.FuncMap{"getWildcardName": getWildcardName, "getChunk": getChunk}).ParseFiles(config.TemplateFile))
+	rootTemplate = template.Must(template.New("nginx").Funcs(template.FuncMap{"getWildcardName": getWildcardName, "getChunk": getChunk, "chunkExists": chunkExists}).ParseFiles(config.TemplateFile))
 }

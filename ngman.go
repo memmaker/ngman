@@ -24,11 +24,17 @@ func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
 		fmt.Println("Usage: ngman list")
-		fmt.Println("Usage: ngman edit <domain>")
+		fmt.Println("Usage: ngman create <domain> <root-path>")
 		fmt.Println("Usage: ngman add-static <domain> <root-path> <uri-location>")
 		fmt.Println("Usage: ngman add-proxy <domain> <endpoint> <uri-location>")
+		fmt.Println("Usage: ngman edit <domain>")
 		fmt.Println("Usage: ngman delete <domain>")
 		fmt.Println("Usage: ngman write-all")
+		return
+	}
+	if args[0] == "create" {
+		createSite(args[1], args[2])
+		tryPostRunCommand()
 		return
 	}
 	if args[0] == "add-static" {

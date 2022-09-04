@@ -8,24 +8,28 @@ import (
 	"strings"
 )
 
-func addProxy(domain string, endpoint string, uriLocation string, headers map[string]string) {
+func addProxy(domain string, endpoint string, uriLocation string, headers map[string]string) bool {
+	if !siteExists(domain) {
+		fmt.Println("Aborted: Site does not exist: " + domain)
+		return false
+	}
 	var site SiteInfo
 	newLocation := ReverseProxyLocation{
 		URLLocation: uriLocation,
 		Endpoint:    endpoint,
 		Headers:     headers,
 	}
-	if !siteExists(domain) {
-		site = initSite(domain, true)
-		site.ProxyLocations = []ReverseProxyLocation{newLocation}
-	} else {
-		site = getSiteByDomain(domain)
-		site.ProxyLocations = append(site.ProxyLocations, newLocation)
-	}
+	site = getSiteByDomain(domain)
+	site.ProxyLocations = append(site.ProxyLocations, newLocation)
 	updateSite(site)
+	return true
 }
 
-func addStaticSite(domain string, rootPath string, uriLocation string) {
+func addStaticSite(domain string, rootPath string, uriLocation string) bool {
+	if !siteExists(domain) {
+		fmt.Println("Aborted: Site does not exist: " + domain)
+		return false
+	}
 	if !dirExists(rootPath) {
 		ensureDirExists(rootPath)
 		content := "<h1>It's working! (" + domain + ")</h1>"
@@ -33,19 +37,19 @@ func addStaticSite(domain string, rootPath string, uriLocation string) {
 	}
 	var site SiteInfo
 	// count the number of dots in the domain name
-	dots := strings.Count(domain, ".")
 	newLocation := StaticLocation{
 		URLLocation: uriLocation,
 		RootPath:    rootPath,
 	}
-	if !siteExists(domain) {
-		site = initSite(domain, dots > 1)
-		site.StaticLocations = []StaticLocation{newLocation}
-	} else {
-		site = getSiteByDomain(domain)
-		site.StaticLocations = append(site.StaticLocations, newLocation)
-	}
+	site = getSiteByDomain(domain)
+	site.StaticLocations = append(site.StaticLocations, newLocation)
 	updateSite(site)
+	return true
+}
+
+func isSubDomain(domain string) bool {
+	dots := strings.Count(domain, ".")
+	return dots > 1
 }
 
 func editSite(domain string) {
@@ -97,4 +101,15 @@ func writeAll() {
 func deleteSite(domain string) {
 	try(os.Remove(config.SiteStorageDirectory + "/" + domain + ".json"))
 	try(os.Remove(config.NginxSiteConfigDirectory + "/" + domain + ".conf"))
+}
+
+func createSite(domain string, rootPath string) {
+	if !siteExists(domain) {
+		subDomain := isSubDomain(domain)
+		site := initSite(domain, subDomain)
+		site.RootPath = rootPath
+		updateSite(site)
+	} else {
+		fmt.Println("Site already exists: " + domain)
+	}
 }

@@ -13,8 +13,6 @@ type SiteInfo struct {
 	Domain          string
 	UseWildcardCert bool
 	UsePHP          bool
-	UseChunk        bool
-	Rewrites        []string
 	StaticLocations []StaticLocation
 	ProxyLocations  []ReverseProxyLocation
 	MiscOptions     []string
