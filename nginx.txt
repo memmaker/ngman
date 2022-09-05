@@ -74,14 +74,17 @@ server {
     {{ template "php-fpm-support" . }}
 {{ end }}
 }
-server {
-    if ($host = {{ .Site.Domain }}) {
-        return 301 https://$host$request_uri;
-    }
 
+server {
     listen 80 http2;
     listen [::]:80 http2;
     server_name {{ .Site.Domain }};
+
+    include /etc/nginx/acme[.]conf;
+
+    if ($host = {{ .Site.Domain }}) {
+        return 301 https://$host$request_uri;
+    }
     return 404;
 }
 {{ end }}
