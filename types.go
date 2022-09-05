@@ -3,6 +3,7 @@ package main
 type GlobalConfig struct {
 	CertificateRootPath      string
 	SiteStorageDirectory     string
+	WebRootPath              string
 	NginxSiteConfigDirectory string
 	TemplateFile             string
 	PostRunCommand           string
@@ -11,12 +12,15 @@ type GlobalConfig struct {
 
 type SiteInfo struct {
 	Domain          string
-	UseWildcardCert bool
 	UsePHP          bool
 	StaticLocations []StaticLocation
 	ProxyLocations  []ReverseProxyLocation
 	MiscOptions     []string
 	RootPath        string
+}
+
+func (s SiteInfo) UseWildcardCert() bool {
+	return isSubDomain(s.Domain)
 }
 
 type ReverseProxyLocation struct {

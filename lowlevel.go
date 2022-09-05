@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/user"
@@ -43,6 +44,7 @@ func fileExists(filename string) bool {
 func ensureDirExists(dir string) {
 	_, err := os.Stat(dir)
 	if os.IsNotExist(err) {
+		fmt.Println("Directory '" + dir + "' does not exist, creating it")
 		try(os.Mkdir(dir, 0755))
 	}
 }

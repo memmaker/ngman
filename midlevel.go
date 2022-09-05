@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"text/template"
 )
@@ -34,44 +35,46 @@ func getAllSites() []SiteInfo {
 }
 
 func getChunk(domain string) string {
-	chunkString := readFile(config.SiteStorageDirectory + "/chunks/" + domain)
+	chunkString := readFile(path.Join(config.SiteStorageDirectory, "chunks", domain))
 	return chunkString
 }
 
 func chunkExists(domain string) bool {
-	_, err := os.Stat(config.SiteStorageDirectory + "/chunks/" + domain)
+	_, err := os.Stat(path.Join(config.SiteStorageDirectory, "chunks", domain))
 	return !errors.Is(err, fs.ErrNotExist)
 }
 
 func getSiteByDomain(domain string) SiteInfo {
-	tomlString := readFile(config.SiteStorageDirectory + "/" + domain + ".toml")
+	tomlString := readFile(path.Join(config.SiteStorageDirectory, domain+".toml"))
 	var siteinfo SiteInfo
 	try(toml.Unmarshal([]byte(tomlString), &siteinfo))
 	return siteinfo
 }
 
 func siteExists(domain string) bool {
-	_, err := os.Stat(config.SiteStorageDirectory + "/" + domain + ".toml")
+	_, err := os.Stat(path.Join(config.SiteStorageDirectory, domain+".toml"))
 	return !os.IsNotExist(err)
 }
 
-func initSite(domain string, rootPath string, useWildcard bool) SiteInfo {
+func initSite(domain string, rootPath string) SiteInfo {
+	useWildcard := isSubDomain(domain)
 	if !certExists(domain, useWildcard) {
 		fmt.Println("No certificate found for " + domain + ". Generating one...")
 		tryGenerateCertificate(domain, rootPath, useWildcard)
 	}
+	ensureDirExists(rootPath)
 	return SiteInfo{
-		Domain:          domain,
-		UseWildcardCert: useWildcard,
+		Domain:   domain,
+		RootPath: rootPath,
 	}
 }
 
 func certExists(domain string, useWildcard bool) bool {
 	var certFileName string
 	if useWildcard {
-		certFileName = config.CertificateRootPath + "/" + getWildcardName(domain) + ".crt"
+		certFileName = path.Join(config.CertificateRootPath, getWildcardName(domain)+".crt")
 	} else {
-		certFileName = config.CertificateRootPath + "/" + domain + ".crt"
+		certFileName = path.Join(config.CertificateRootPath, domain+".crt")
 	}
 	return fileExists(certFileName)
 }
@@ -110,7 +113,7 @@ func updateSite(siteinfo SiteInfo) {
 func writeSiteInfo(siteinfo SiteInfo) {
 	// marshal the siteinfo to toml
 	tomlString := must(toml.Marshal(siteinfo))
-	try(writeFile(config.SiteStorageDirectory+"/"+siteinfo.Domain+".toml", tomlString))
+	try(writeFile(path.Join(config.SiteStorageDirectory, siteinfo.Domain+".toml"), tomlString))
 }
 func writeNginxConfig(site SiteInfo) {
 	context := RenderContext{
@@ -119,22 +122,23 @@ func writeNginxConfig(site SiteInfo) {
 	}
 	output := renderTemplate(context)
 	renderedString := removeRedundantEmptyLines(string(output))
-	try(writeFile(config.NginxSiteConfigDirectory+"/"+site.Domain+".conf", []byte(renderedString)))
+	try(writeFile(path.Join(config.NginxSiteConfigDirectory, site.Domain+".conf"), []byte(renderedString)))
 }
 
 func loadConfig() {
 	homeDir := must(os.UserHomeDir())
-	configDir := homeDir + "/.ngman"
+	configDir := path.Join(homeDir, ".ngman")
 	ensureDirExists(configDir)
-	configFilename := configDir + "/config.toml"
+	configFilename := path.Join(configDir, "config.toml")
 	if !fileExists(configFilename) {
 		config = GlobalConfig{
-			SiteStorageDirectory:     configDir + "/sites",
-			TemplateFile:             configDir + "/nginx.txt",
-			NginxSiteConfigDirectory: configDir + "/sites-enabled",
+			SiteStorageDirectory:     path.Join(configDir, "sites"),
+			TemplateFile:             path.Join(configDir, "nginx.txt"),
+			NginxSiteConfigDirectory: path.Join(configDir, "sites-enabled"),
 			PostRunCommand:           "",
 			GenerateCertCommand:      "",
 			CertificateRootPath:      "/ssl/certificates",
+			WebRootPath:              "/var/www",
 		}
 
 		tomlString := must(toml.Marshal(config))
@@ -147,9 +151,7 @@ func loadConfig() {
 
 // sub.domain.com -> _.domain.com
 func getWildcardName(domain string) string {
-	//split string by "."
 	domainParts := strings.Split(domain, ".")
-	// take the last two parts of the domain and join them with "."
 	return "_." + strings.Join(domainParts[len(domainParts)-2:], ".")
 }
 

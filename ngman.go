@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"text/template"
 )
 
@@ -16,6 +17,19 @@ func main() {
 		log.Fatal("This program must be run as root")
 	}
 	loadConfig()
+	if config.WebRootPath == "" {
+		log.Fatal("Web root path is not set")
+	}
+	if config.SiteStorageDirectory == "" {
+		log.Fatal("Site storage directory is not set")
+	}
+	if config.NginxSiteConfigDirectory == "" {
+		log.Fatal("Nginx site config directory is not set")
+	}
+	if !fileExists(config.TemplateFile) {
+		log.Fatal("Template file '" + config.TemplateFile + "' does not exist")
+	}
+	ensureDirExists(config.WebRootPath)
 	ensureDirExists(config.SiteStorageDirectory)
 	ensureDirExists(config.NginxSiteConfigDirectory)
 	loadTemplates()
@@ -23,36 +37,44 @@ func main() {
 	// get command line arguments
 	args := os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("Usage: ngman list")
-		fmt.Println("Usage: ngman create <domain> <root-path>")
-		fmt.Println("Usage: ngman add-static <domain> <root-path> <uri-location>")
-		fmt.Println("Usage: ngman add-proxy <domain> <endpoint> <uri-location>")
-		fmt.Println("Usage: ngman edit <domain>")
-		fmt.Println("Usage: ngman delete <domain>")
-		fmt.Println("Usage: ngman write-all")
+		printUsage()
 		return
 	}
-	if args[0] == "create" {
-		createSite(args[1], args[2])
+	if args[0] == "add-site" && len(args) > 1 {
+		var rootPath string
+		if len(args) == 3 {
+			rootPath = args[2]
+		} else {
+			rootPath = path.Join(config.WebRootPath, args[1])
+			fmt.Println("No WebRoot specified, using '" + rootPath + "'")
+		}
+		createSite(args[1], rootPath)
 		tryPostRunCommand()
 		return
 	}
-	if args[0] == "add-static" {
+	if args[0] == "add-static" && len(args) == 4 {
 		addStaticSite(args[1], args[2], args[3])
 		tryPostRunCommand()
 		return
 	}
-	if args[0] == "add-proxy" {
-		addProxy(args[1], args[2], args[3], nil)
+	if args[0] == "add-proxy" && len(args) > 2 {
+		var uriLocation string
+		if len(args) == 4 {
+			uriLocation = args[3]
+		} else {
+			uriLocation = "/"
+			fmt.Println("No URI location specified, using '" + uriLocation + "'")
+		}
+		addProxy(args[1], args[2], uriLocation, nil)
 		tryPostRunCommand()
 		return
 	}
-	if args[0] == "delete" {
+	if args[0] == "delete" && len(args) == 2 {
 		deleteSite(args[1])
 		tryPostRunCommand()
 		return
 	}
-	if args[0] == "edit" {
+	if args[0] == "edit" && len(args) == 2 {
 		editSite(args[1])
 		tryPostRunCommand()
 		return
@@ -66,5 +88,15 @@ func main() {
 		tryPostRunCommand()
 		return
 	}
-	fmt.Println("Unknown command: " + args[0])
+	printUsage()
+}
+
+func printUsage() {
+	fmt.Println("Usage: ngman list")
+	fmt.Println("Usage: ngman add-site <domain> [<webroot>]")
+	fmt.Println("Usage: ngman add-static <domain> <webroot> <uri-location>")
+	fmt.Println("Usage: ngman add-proxy <domain> <endpoint> [<uri-location>]")
+	fmt.Println("Usage: ngman edit <domain>")
+	fmt.Println("Usage: ngman delete <domain>")
+	fmt.Println("Usage: ngman write-all")
 }

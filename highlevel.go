@@ -10,10 +10,8 @@ import (
 )
 
 func addProxy(domain string, endpoint string, uriLocation string, headers map[string]string) bool {
-	if !siteExists(domain) {
-		fmt.Println("Aborted: Site does not exist: " + domain)
-		return false
-	}
+	ensureSiteExists(domain)
+
 	var site SiteInfo
 	newLocation := ReverseProxyLocation{
 		URLLocation: uriLocation,
@@ -27,10 +25,8 @@ func addProxy(domain string, endpoint string, uriLocation string, headers map[st
 }
 
 func addStaticSite(domain string, rootPath string, uriLocation string) bool {
-	if !siteExists(domain) {
-		fmt.Println("Aborted: Site does not exist: " + domain)
-		return false
-	}
+	ensureSiteExists(domain)
+
 	if !dirExists(rootPath) {
 		ensureDirExists(rootPath)
 		content := "<h1>It's working! (" + domain + ")</h1>"
@@ -46,6 +42,14 @@ func addStaticSite(domain string, rootPath string, uriLocation string) bool {
 	site.StaticLocations = append(site.StaticLocations, newLocation)
 	updateSite(site)
 	return true
+}
+
+func ensureSiteExists(domain string) {
+	if !siteExists(domain) {
+		rootPath := path.Join(config.WebRootPath, domain)
+		fmt.Println("No WebRoot specified, using '" + rootPath + "'")
+		createSite(domain, rootPath)
+	}
 }
 
 func isSubDomain(domain string) bool {
@@ -107,9 +111,8 @@ func deleteSite(domain string) {
 
 func createSite(domain string, rootPath string) {
 	if !siteExists(domain) {
-		subDomain := isSubDomain(domain)
-		site := initSite(domain, rootPath, subDomain)
-		site.RootPath = rootPath
+
+		site := initSite(domain, rootPath)
 		updateSite(site)
 	} else {
 		fmt.Println("Site already exists: " + domain)
