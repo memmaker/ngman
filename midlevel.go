@@ -58,11 +58,11 @@ func siteExists(domain string) bool {
 
 func initSite(domain string, rootPath string) SiteInfo {
 	useWildcard := isSubDomain(domain)
+	ensureDirExists(rootPath)
 	if !certExists(domain, useWildcard) {
 		fmt.Println("No certificate found for " + domain + ". Generating one...")
 		tryGenerateCertificate(domain, rootPath, useWildcard)
 	}
-	ensureDirExists(rootPath)
 	return SiteInfo{
 		Domain:   domain,
 		RootPath: rootPath,
