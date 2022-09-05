@@ -53,7 +53,6 @@ func main() {
 			fmt.Println("No WebRoot specified, using '" + rootPath + "'")
 		}
 		createSite(args[1], rootPath)
-		tryPostRunCommand()
 		return
 	}
 	if args[0] == "add-static" && len(args) == 4 {

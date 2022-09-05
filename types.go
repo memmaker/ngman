@@ -35,6 +35,7 @@ type StaticLocation struct {
 }
 
 type RenderContext struct {
-	Site   SiteInfo
-	Config GlobalConfig
+	Site       SiteInfo
+	Config     GlobalConfig
+	SSLEnabled bool
 }

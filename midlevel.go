@@ -56,16 +56,22 @@ func siteExists(domain string) bool {
 	return !os.IsNotExist(err)
 }
 
-func initSite(domain string, rootPath string) SiteInfo {
+func initSite(domain string, rootPath string) {
 	useWildcard := isSubDomain(domain)
 	ensureDirExists(rootPath)
+	site := SiteInfo{
+		Domain:   domain,
+		RootPath: rootPath,
+	}
+	writeHTTPOnlyNginxConfig(site)
+	tryPostRunCommand()
 	if !certExists(domain, useWildcard) {
 		fmt.Println("No certificate found for " + domain + ". Generating one...")
 		tryGenerateCertificate(domain, rootPath, useWildcard)
 	}
-	return SiteInfo{
-		Domain:   domain,
-		RootPath: rootPath,
+	if certExists(domain, useWildcard) {
+		updateSite(site)
+		tryPostRunCommand()
 	}
 }
 
@@ -89,7 +95,10 @@ func tryGenerateCertificate(domain string, rootPath string, wildcard bool) {
 		wildcardName = strings.Replace(wildcardName, "_", "*", 1)
 		domain = wildcardName
 	}
-	cmd := exec.Command("bash", "--login", "-c", config.GenerateCertCommand, domain, rootPath)
+	commandLine := config.GenerateCertCommand + " " + domain + " " + rootPath
+	arguments := []string{"--login", "-c", commandLine}
+	fmt.Println("Running certificate generation command: bash " + strings.Join(arguments, " "))
+	cmd := exec.Command("bash", arguments...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	try(cmd.Run())
@@ -117,9 +126,23 @@ func writeSiteInfo(siteinfo SiteInfo) {
 }
 func writeNginxConfig(site SiteInfo) {
 	context := RenderContext{
-		Site:   site,
-		Config: config,
+		Site:       site,
+		Config:     config,
+		SSLEnabled: true,
 	}
+	renderNginxConfig(site, context)
+}
+
+func writeHTTPOnlyNginxConfig(site SiteInfo) {
+	context := RenderContext{
+		Site:       site,
+		Config:     config,
+		SSLEnabled: false,
+	}
+	renderNginxConfig(site, context)
+}
+
+func renderNginxConfig(site SiteInfo, context RenderContext) {
 	output := renderTemplate(context)
 	renderedString := removeRedundantEmptyLines(string(output))
 	try(writeFile(path.Join(config.NginxSiteConfigDirectory, site.Domain+".conf"), []byte(renderedString)))

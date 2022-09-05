@@ -111,8 +111,7 @@ func deleteSite(domain string) {
 
 func createSite(domain string, rootPath string) {
 	if !siteExists(domain) {
-		site := initSite(domain, rootPath)
-		updateSite(site)
+		initSite(domain, rootPath)
 	} else {
 		fmt.Println("Site already exists: " + domain)
 	}
