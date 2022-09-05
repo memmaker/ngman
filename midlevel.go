@@ -55,10 +55,10 @@ func siteExists(domain string) bool {
 	return !os.IsNotExist(err)
 }
 
-func initSite(domain string, useWildcard bool) SiteInfo {
+func initSite(domain string, rootPath string, useWildcard bool) SiteInfo {
 	if !certExists(domain, useWildcard) {
 		fmt.Println("No certificate found for " + domain + ". Generating one...")
-		tryGenerateCertificate(domain, useWildcard)
+		tryGenerateCertificate(domain, rootPath, useWildcard)
 	}
 	return SiteInfo{
 		Domain:          domain,
@@ -76,7 +76,7 @@ func certExists(domain string, useWildcard bool) bool {
 	return fileExists(certFileName)
 }
 
-func tryGenerateCertificate(domain string, wildcard bool) {
+func tryGenerateCertificate(domain string, rootPath string, wildcard bool) {
 	if config.GenerateCertCommand == "" {
 		fmt.Println("No certificate generation command specified. Skipping...")
 		return
@@ -86,8 +86,7 @@ func tryGenerateCertificate(domain string, wildcard bool) {
 		wildcardName = strings.Replace(wildcardName, "_", "*", 1)
 		domain = wildcardName
 	}
-	command := config.GenerateCertCommand + " " + domain
-	cmd := exec.Command("bash", "--login", "-c", command)
+	cmd := exec.Command("bash", "--login", "-c", config.GenerateCertCommand, domain, rootPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	try(cmd.Run())

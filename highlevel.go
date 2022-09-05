@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func addStaticSite(domain string, rootPath string, uriLocation string) bool {
 	if !dirExists(rootPath) {
 		ensureDirExists(rootPath)
 		content := "<h1>It's working! (" + domain + ")</h1>"
-		try(writeFile(rootPath+"/index.html", []byte(content)))
+		try(writeFile(path.Join(rootPath, "index.html"), []byte(content)))
 	}
 	var site SiteInfo
 	// count the number of dots in the domain name
@@ -58,7 +59,7 @@ func editSite(domain string) {
 	if editor == "" {
 		editor = "nano"
 	}
-	cmd := exec.Command(editor, config.SiteStorageDirectory+"/"+domain+".toml")
+	cmd := exec.Command(editor, path.Join(config.SiteStorageDirectory, domain+".toml"))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -99,14 +100,15 @@ func writeAll() {
 }
 
 func deleteSite(domain string) {
-	try(os.Remove(config.SiteStorageDirectory + "/" + domain + ".toml"))
-	try(os.Remove(config.NginxSiteConfigDirectory + "/" + domain + ".conf"))
+	try(os.Remove(path.Join(config.SiteStorageDirectory, domain+".toml")))
+	try(os.Remove(path.Join(config.NginxSiteConfigDirectory, domain+".conf")))
+	path.Join()
 }
 
 func createSite(domain string, rootPath string) {
 	if !siteExists(domain) {
 		subDomain := isSubDomain(domain)
-		site := initSite(domain, subDomain)
+		site := initSite(domain, rootPath, subDomain)
 		site.RootPath = rootPath
 		updateSite(site)
 	} else {
