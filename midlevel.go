@@ -126,8 +126,7 @@ func writeNginxConfig(site SiteInfo) {
 }
 
 func loadConfig() {
-	homeDir := must(os.UserHomeDir())
-	configDir := path.Join(homeDir, ".ngman")
+	configDir := getConfigDir()
 	ensureDirExists(configDir)
 	configFilename := path.Join(configDir, "config.toml")
 	if !fileExists(configFilename) {
@@ -147,6 +146,12 @@ func loadConfig() {
 		tomlString := readFile(configFilename)
 		try(toml.Unmarshal([]byte(tomlString), &config))
 	}
+}
+
+func getConfigDir() string {
+	homeDir := must(os.UserHomeDir())
+	configDir := path.Join(homeDir, ".ngman")
+	return configDir
 }
 
 // sub.domain.com -> _.domain.com

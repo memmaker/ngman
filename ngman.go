@@ -18,15 +18,19 @@ func main() {
 	}
 	loadConfig()
 	if config.WebRootPath == "" {
+		printCheckConfig()
 		log.Fatal("Web root path is not set")
 	}
 	if config.SiteStorageDirectory == "" {
+		printCheckConfig()
 		log.Fatal("Site storage directory is not set")
 	}
 	if config.NginxSiteConfigDirectory == "" {
+		printCheckConfig()
 		log.Fatal("Nginx site config directory is not set")
 	}
 	if !fileExists(config.TemplateFile) {
+		printCheckConfig()
 		log.Fatal("Template file '" + config.TemplateFile + "' does not exist")
 	}
 	ensureDirExists(config.WebRootPath)
@@ -89,6 +93,11 @@ func main() {
 		return
 	}
 	printUsage()
+}
+
+func printCheckConfig() {
+	configFilename := path.Join(getConfigDir(), "config.toml")
+	fmt.Println("Please check the config file at " + configFilename)
 }
 
 func printUsage() {
