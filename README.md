@@ -12,7 +12,8 @@ A lightweight abstraction layer around [nginx](https://www.nginx.com/) and [lego
  * Simplified declarative or imperative configuration
  * Automatic SSL certificate generation and renewal
 
-It basically makes [nginx](https://www.nginx.com/) as easy to configure as [Caddy](https://caddyserver.com/).
+It basically aims at making [nginx](https://www.nginx.com/) as easy to configure as [Caddy](https://caddyserver.com/).
+At least regarding the specific use-cases of static site hosting and reverse proxying.
 
 ## Requirements
 
@@ -51,6 +52,27 @@ You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It W
     ngman add-proxy <your-domain> http://webserver:80
 
 You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It Works".
+
+## Adding new sites locations
+
+You can add additional virtual hosts to your web server by using the respective command:
+
+    ngman add-site <your-domain>
+    or
+    ngman add-location <your-domain> /static /var/www/<your-domain>/static
+    or
+    ngman add-proxy <your-domain> http://webserver:80
+
+These will
+
+ * update your site's configuration,
+ * write a new nginx configuration file, 
+ * make sure that the SSL certificate is available 
+ * and reload the nginx container.
+
+Alternatively you can also edit the configuration file directly:
+
+    ngman edit <your-domain>
 
 ## What does setup.sh do?
 
@@ -123,49 +145,6 @@ ngman will try to execute this command after it has made any changes to nginx co
 ngman will try to execute this command when it needs to generate a new SSL certificate.
 It will pass the respective domain name as the first argument.
 
-**NOTE:**
-I suggest using [lego](https://github.com/go-acme/lego) in combination with [podman](https://podman.io/) for certificate generation.
-You can then do something like this
-
-    create_ssl_cert () {
-        podman run \
-        --env [YOUR-DOMAIN-API-TOKEN] \
-        -v /ssl:/lego \
-        goacme/lego \
-        --accept-tos \
-        --path /lego \
-        --email [YOUR-EMAIL] \
-        --dns dode \
-        --domains "$@" \
-        run
-    }
-
-Which will create a command as expected by **ngman**, where you just have to provide a domain name as argument.
-
-For certificate renewal, I suggest something like this
-
-    for keyfile in $(sudo ls /ssl/certificates/ | grep key)
-    do
-        replaced="${keyfile/_/*}"
-        renew_ssl_cert "${replaced%.*}" >> /tmp/cert.log
-    done
-
-Where renew_ssl_cert is the same as create_ssl_cert, but with the **run** command replaced by **renew**.
-
-## Installation
-
-    ARCH=darwin_amd64;
-    mkdir ~/.ngman > /dev/null 2>&1;
-    pushd;
-    cd ~/.ngman && \
-    wget https://github.com/memmaker/ngman/releases/latest/download/nginx.txt && \
-    wget https://github.com/memmaker/ngman/releases/latest/download/ngman_${ARCH}.zip && \ 
-    unzip ngman_${ARCH}.zip && rm ngman_${ARCH}.zip && \
-    mv ngman_${ARCH} /usr/local/bin/ngman && popd
-
-## Uninstall
-
-    rm -rf ~/.ngman && rm /usr/local/bin/ngman
 
 ## Usage
 
@@ -232,3 +211,50 @@ So if you add a site with a domain like **"example.org"** a normal LetsEncrypt c
 However, if you add a site with a domain like **"sub.example.org"** a wildcard certificate will be generated and used.
 
 Subsequent sites with a domain like **"foo.example.org"** will then also use the same wildcard certificate.
+
+## Standalone usage of ngman
+
+**NOTE: ALL THE FOLLOWING IS ALREADY INCLUDED AND AUTOMATED IN THE [setup.sh file](https://github.com/memmaker/ngman/blob/main/setup.sh) and [mmx23/nginx image](https://hub.docker.com/repository/docker/mmx23/nginx)**
+
+I suggest using [lego](https://github.com/go-acme/lego) in combination with [podman](https://podman.io/) for certificate generation.
+You can then do something like this
+
+    create_ssl_cert () {
+        podman run \
+        --env [YOUR-DOMAIN-API-TOKEN] \
+        -v /ssl:/lego \
+        goacme/lego \
+        --accept-tos \
+        --path /lego \
+        --email [YOUR-EMAIL] \
+        --dns dode \
+        --domains "$@" \
+        run
+    }
+
+Which will create a command as expected by **ngman**, where you just have to provide a domain name as argument.
+
+For certificate renewal, I suggest something like this
+
+    for keyfile in $(sudo ls /ssl/certificates/ | grep key)
+    do
+        replaced="${keyfile/_/*}"
+        renew_ssl_cert "${replaced%.*}" >> /tmp/cert.log
+    done
+
+Where renew_ssl_cert is the same as create_ssl_cert, but with the **run** command replaced by **renew**.
+
+## Installation
+
+    ARCH=darwin_amd64;
+    mkdir ~/.ngman > /dev/null 2>&1;
+    pushd;
+    cd ~/.ngman && \
+    wget https://github.com/memmaker/ngman/releases/latest/download/nginx.txt && \
+    wget https://github.com/memmaker/ngman/releases/latest/download/ngman_${ARCH}.zip && \ 
+    unzip ngman_${ARCH}.zip && rm ngman_${ARCH}.zip && \
+    mv ngman_${ARCH} /usr/local/bin/ngman && popd
+
+## Uninstall
+
+    rm -rf ~/.ngman && rm /usr/local/bin/ngman
