@@ -1,10 +1,66 @@
 # ngman
 
-A simple CLI tool for managing nginx sites.
+A lightweight abstraction layer around [nginx](https://www.nginx.com/) and [lego](https://github.com/go-acme/lego)
 
 **Homepage / Demo:** https://textzentrisch.de/pages/ngman/
 
-## Concept
+## Features
+
+ * Launch a new website with a single command
+ * Supports static locations
+ * Supports reverse proxy locations
+ * Simplified declarative or imperative configuration
+ * Automatic SSL certificate generation and renewal
+
+It basically makes [nginx](https://www.nginx.com/) as easy to configure as [Caddy](https://caddyserver.com/).
+
+## Requirements
+
+1. A linux (Ubuntu 22.04) based web-server with root shell access
+2. A domain name pointing to the ip address of the web-server
+
+**NOTE:** Currently the setup.sh script uses **apt** to install **podman** and **unzip**.
+It *should* also work correctly if you just pre-install these commands via your package manager of choice and then run
+**setup.sh** script.
+
+In combination with [podman](https://podman.io/) and a pre-configured nginx container, you can do some pretty cool stuff.
+These example use a container that has been built from the ngman/Nginx subdirectory.
+
+## Self-hosted HTTPS content in three steps
+
+    1. Setup a Web Server
+    curl -sL https://github.com/memmaker/ngman/releases/download/v1.0.2/setup.sh | bash -s <your-acme-mail>
+
+    2. Add a site with the respective domain
+    ngman add-site <your-domain>
+
+    3. Publish your content
+    echo "It Works" > /var/www/<your-domain>/index.html
+
+You can now visit https://<your-domain>/ in the browser and will see "It Works".
+
+## Self-hosted HTTPS reverse proxy in three steps
+
+    1. Setup a Web Server
+    curl -sL https://github.com/memmaker/ngman/releases/download/v1.0.2/setup.sh | bash -s <your-acme-mail>
+
+    2. Startup your service container
+    podman run --name webserver --network podnet -dt docker.io/library/httpd:alpine
+
+    3. Add your service to ngman
+    ngman add-proxy <your-domain> http://webserver:80
+
+You can now visit https://<your-domain>/ in the browser and will see "It Works".
+
+## What does setup.sh do?
+
+1. Installs [podman](https://podman.io/)
+2. Installs [ngman](https://github.com/memmaker/ngman)
+3. Generate DH parameters for HTTPS
+4. Setup a container network with DNS support
+5. Start an pre-configured nginx container that includes [lego](https://github.com/go-acme/lego)
+
+## Concepts of ngman
 
 A site is uniquely identified by the domain name.
 
@@ -54,6 +110,8 @@ This is the main output directory for the nginx config files.
 ### TemplateFile
 
 The path to the file that contains the nginx config templates.
+
+The template language used is [Go's text/template](https://golang.org/pkg/text/template/).
 
 ### PostRunCommand
 
