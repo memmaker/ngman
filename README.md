@@ -24,7 +24,7 @@ It *should* also work correctly if you just pre-install these commands via your 
 **setup.sh** script.
 
 In combination with [podman](https://podman.io/) and a pre-configured nginx container, you can do some pretty cool stuff.
-These example use a container that has been built from the ngman/Nginx subdirectory.
+These examples use a container that has been built from the [ngman/Nginx subdirectory](https://github.com/memmaker/ngman/tree/main/Nginx).
 
 ## Self-hosted HTTPS content in three steps
 
@@ -59,6 +59,7 @@ You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It W
 3. Generate DH parameters for HTTPS
 4. Setup a container network with DNS support
 5. Start an pre-configured nginx container that includes [lego](https://github.com/go-acme/lego)
+6. Setup a cronjob for automatic SSL certificate renewal
 
 ## Concepts of ngman
 
