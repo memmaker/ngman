@@ -37,7 +37,7 @@ These example use a container that has been built from the ngman/Nginx subdirect
     3. Publish your content
     echo "It Works" > /var/www/<your-domain>/index.html
 
-You can now visit https://<your-domain>/ in the browser and will see "It Works".
+You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It Works".
 
 ## Self-hosted HTTPS reverse proxy in three steps
 
@@ -50,7 +50,7 @@ You can now visit https://<your-domain>/ in the browser and will see "It Works".
     3. Add your service to ngman
     ngman add-proxy <your-domain> http://webserver:80
 
-You can now visit https://<your-domain>/ in the browser and will see "It Works".
+You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It Works".
 
 ## What does setup.sh do?
 
