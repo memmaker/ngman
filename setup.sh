@@ -1,7 +1,7 @@
 #!/bin/bash
 
 EMAIL="$1"
-NGMAN_VERSION=v1.0.2
+NGMAN_VERSION=v1.0.4
 
 if [ -z "$EMAIL" ]; then
   echo "Please provide an email address as first argument"
@@ -17,10 +17,7 @@ fi
 if [ ! -f /usr/local/bin/ngman ]; then
   echo "ngman not found, installing it"
   mkdir -p "$HOME"/.ngman/nginx-conf /ssl /var/www/_acme-challenges && \
-  wget -qO /tmp/ngman.zip https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/ngman_linux_amd64.zip && \
-  unzip /tmp/ngman.zip -d /tmp > /dev/null && \
-  mv /tmp/ngman_linux_amd64 /usr/local/bin/ngman && \
-  rm /tmp/ngman.zip && \
+  curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/ngman_linux_amd64.tgz | tar xzO > /usr/local/bin/ngman && \
   wget -qO "$HOME"/.ngman/nginx.txt https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt
   printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '%s/.ngman/nginx-conf'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'podman exec ngx service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'podman exec ngx ssl-create.sh'" "$HOME" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
 fi
