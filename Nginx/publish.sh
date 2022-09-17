@@ -1,0 +1,1 @@
+podman push ghcr.io/memmaker/nginx:latest

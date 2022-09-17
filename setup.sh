@@ -39,10 +39,20 @@ if podman container exists ngx; then
   echo "Removing existing container ngx"
   podman rm -f ngx > /dev/null
 fi
+
+if [ ! -f "$HOME"/.ngman/dnsprovider.env ] || [ ! -s "$HOME"/.ngman/dnsprovider.env ]; then
+  echo "Could not find dnsprovider.env, please create it and add your dns provider credentials"
+  echo "ACME DNS Challenge is currently disabled, no wildcard certificate support."
+  touch "$HOME"/.ngman/dnsprovider.env
+else
+  echo "Found dnsprovider.env, enabling ACME DNS Challenge and wildcard support"
+fi
+
 echo "Starting container ngx"
 podman run \
   -d \
   -e ACMEMAIL="$EMAIL" \
+  --env-file="$HOME"/.ngman/dnsprovider.env \
   --name ngx \
   -p 80:80 \
   -p 443:443 \
@@ -51,7 +61,7 @@ podman run \
   -v /ssl:/ssl \
   -v /var/www:/var/www \
   --network podnet \
-  docker.io/mmx23/nginx
+  ghcr.io/memmaker/nginx
 
 newcron () {
   crontab -l > /tmp/crontab_temp 2> /dev/null
