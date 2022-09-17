@@ -30,7 +30,7 @@ These examples use a container that has been built from the [ngman/Nginx subdire
 ## Self-hosted HTTPS content in three steps
 
     1. Setup a Web Server
-    curl -sL https://github.com/memmaker/ngman/releases/download/latest/setup.sh | sudo bash -s <your-acme-mail>
+    curl -sL https://github.com/memmaker/ngman/releases/download/v1.0.4/setup.sh | sudo bash -s <your-acme-mail>
 
     2. Add a site with the respective domain
     ngman add-site <your-domain>
@@ -43,7 +43,7 @@ You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It W
 ## Self-hosted HTTPS reverse proxy in three steps
 
     1. Setup a Web Server
-    curl -sL https://github.com/memmaker/ngman/releases/download/latest/setup.sh | sudo bash -s <your-acme-mail>
+    curl -sL https://github.com/memmaker/ngman/v1.0.4/download/latest/setup.sh | sudo bash -s <your-acme-mail>
 
     2. Startup your service container
     podman run --name webserver --network podnet -dt docker.io/library/httpd:alpine
@@ -211,6 +211,18 @@ So if you add a site with a domain like **"example.org"** a normal LetsEncrypt c
 However, if you add a site with a domain like **"sub.example.org"** a wildcard certificate will be generated and used.
 
 Subsequent sites with a domain like **"foo.example.org"** will then also use the same wildcard certificate.
+
+NOTE: In order to use wildcard support, you will have to provide the file **"~/.ngman/dnsprovider.env"**.
+This file should contain the credentials for your DNS provider.
+
+See [lego's documentation](https://go-acme.github.io/lego/dns/) for more information.
+
+Example:
+
+    root@dallas:~/.ngman# cat dnsprovider.env
+    DNS_PROVIDER=dode    
+    DODE_TOKEN=12345678901234677
+    
 
 ## Standalone usage of ngman
 
