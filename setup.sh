@@ -1,17 +1,38 @@
 #!/bin/bash
 
+# Check for needed arguments
+if [ -z "$EMAIL" ]; then
+  echo "Please provide an email address as first argument"
+  exit 1
+fi
+
+# Function definitions
+get_latest_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
+newcron () {
+  crontab -l > /tmp/crontab_temp 2> /dev/null
+  if grep -Fxq "$*" /tmp/crontab_temp; then
+    echo "Cronjob already exists, skipping"
+  else
+    echo "Adding cronjob $*"
+    echo "$*" >> /tmp/crontab_temp && \
+    crontab /tmp/crontab_temp && \
+    rm /tmp/crontab_temp
+  fi
+}
+
+
 EMAIL="$1"
-NGMAN_VERSION=v1.0.4
+NGMAN_VERSION=$(get_latest_release "memmaker/ngman")
 
 WEBROOT="$HOME/www"
 CERTROOT="$HOME/ssl"
 
 mkdir -p "$CERTROOT" "$WEBROOT"/_acme-challenges
-
-if [ -z "$EMAIL" ]; then
-  echo "Please provide an email address as first argument"
-  exit 1
-fi
 
 if ! command -v podman &> /dev/null
 then
@@ -31,7 +52,7 @@ if [ ! -f "$HOME"/bin/ngman ]; then
   mkdir -p "$HOME"/.ngman/nginx-conf && \
   curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/ngman_linux_amd64.tgz | tar xzO > "$HOME"/bin/ngman && \
   curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt > "$HOME"/.ngman/nginx.txt && \
-  printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '%s/.ngman/nginx-conf'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'podman exec ngx service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'podman exec ngx ssl-create.sh'" "$HOME" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
+  printf "CertificateRootPath = '%s/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '%s/.ngman/nginx-conf'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'podman exec ngx service nginx reload'\nWebRootPath = '%s/www'\nGenerateCertCommand = 'podman exec ngx ssl-create.sh'" "$HOME" "$HOME" "$HOME" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
 fi
 
 
@@ -65,19 +86,8 @@ podman run \
   -v "$CERTROOT":/ssl \
   -v "$WEBROOT":/var/www \
   --network podnet \
-  ghcr.io/memmaker/nginx
+  ghcr.io/memmaker/nginx:latest
 
-newcron () {
-  crontab -l > /tmp/crontab_temp 2> /dev/null
-  if grep -Fxq "$*" /tmp/crontab_temp; then
-    echo "Cronjob already exists, skipping"
-  else
-    echo "Adding cronjob $*"
-    echo "$*" >> /tmp/crontab_temp && \
-    crontab /tmp/crontab_temp && \
-    rm /tmp/crontab_temp
-  fi
-}
 
 RENEWCMD="podman exec ngx ssl-renew.sh"
 newcron "0 4 1 */2 * ${RENEWCMD} >/dev/null 2>&1"
