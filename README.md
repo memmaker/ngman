@@ -20,14 +20,14 @@ At least regarding the specific use-cases of static site hosting and reverse pro
 1. A linux (Ubuntu 22.04) based web-server with root shell access
 2. A domain name pointing to the ip address of the web-server
 
-**NOTE:** Currently the setup.sh script uses **apt** to install **podman** and **unzip**.
-It *should* also work correctly if you just pre-install these commands via your package manager of choice and then run
+**NOTE:** Currently the setup.sh script uses **apt** to install **podman**.
+It *should* also work correctly if you just pre-install podman via your package manager of choice and then run
 **setup.sh** script.
 
 In combination with [podman](https://podman.io/) and a pre-configured nginx container, you can do some pretty cool stuff.
 These examples use a container that has been built from the [ngman/Nginx subdirectory](https://github.com/memmaker/ngman/tree/main/Nginx).
 
-## Self-hosted HTTPS content in three steps
+## Self-hosted HTTPS static content in three steps
 
     1. Setup a Web Server
     curl -sL https://github.com/memmaker/ngman/releases/download/v1.0.4/setup.sh | sudo bash -s <your-acme-mail>

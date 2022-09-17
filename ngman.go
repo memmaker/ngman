@@ -13,9 +13,6 @@ var config GlobalConfig
 var rootTemplate *template.Template
 
 func main() {
-	if !isRoot() {
-		log.Fatal("This program must be run as root")
-	}
 	loadConfig()
 	if config.WebRootPath == "" {
 		printCheckConfig()

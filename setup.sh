@@ -3,6 +3,11 @@
 EMAIL="$1"
 NGMAN_VERSION=v1.0.4
 
+WEBROOT="$HOME/www"
+CERTROOT="$HOME/ssl"
+
+mkdir -p "$CERTROOT" "$WEBROOT"/_acme-challenges
+
 if [ -z "$EMAIL" ]; then
   echo "Please provide an email address as first argument"
   exit 1
@@ -11,22 +16,24 @@ fi
 if ! command -v podman &> /dev/null
 then
     echo "podman not found, installing it"
-    apt-get update &> /dev/null && apt-get install -y unzip podman > /dev/null
+    sudo apt-get update &> /dev/null && sudo apt-get install -y podman > /dev/null
 fi
 
-if [ ! -f /usr/local/bin/ngman ]; then
+if [ ! -f /etc/sysctl.d/99-rootless.conf ]; then
+  echo "Setting up sysctl for rootless http services"
+  echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee /etc/sysctl.d/99-rootless.conf
+  sudo sysctl --system
+fi
+
+
+if [ ! -f "$HOME"/bin/ngman ]; then
   echo "ngman not found, installing it"
-  mkdir -p "$HOME"/.ngman/nginx-conf /ssl /var/www/_acme-challenges && \
-  curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/ngman_linux_amd64.tgz | tar xzO > /usr/local/bin/ngman && \
-  wget -qO "$HOME"/.ngman/nginx.txt https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt
+  mkdir -p "$HOME"/.ngman/nginx-conf && \
+  curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/ngman_linux_amd64.tgz | tar xzO > "$HOME"/bin/ngman && \
+  curl -sL https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt > "$HOME"/.ngman/nginx.txt && \
   printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '%s/.ngman/nginx-conf'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'podman exec ngx service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'podman exec ngx ssl-create.sh'" "$HOME" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
 fi
 
-
-if [ ! -f "$HOME"/.ngman/dhparam.pem ]; then
-  echo "Generating dhparam.pem for nginx https (this may take a while)"
-  openssl dhparam -out "$HOME"/.ngman/dhparam.pem 4096
-fi
 
 if ! podman network exists podnet; then
   echo "Creating podman network podnet"
@@ -55,8 +62,8 @@ podman run \
   -p 443:443 \
   -v "$HOME"/.ngman/dhparam.pem:/etc/nginx/dhparam.pem \
   -v "$HOME"/.ngman/nginx-conf:/etc/nginx/conf.d/ \
-  -v /ssl:/ssl \
-  -v /var/www:/var/www \
+  -v "$CERTROOT":/ssl \
+  -v "$WEBROOT":/var/www \
   --network podnet \
   ghcr.io/memmaker/nginx
 
@@ -74,3 +81,4 @@ newcron () {
 
 RENEWCMD="podman exec ngx ssl-renew.sh"
 newcron "0 4 1 */2 * ${RENEWCMD} >/dev/null 2>&1"
+
