@@ -40,7 +40,7 @@ func getChunk(domain string) string {
 }
 
 func getResolver() string {
-	lines := readLines(path.Join("etc", "resolv.conf"))
+	lines := readLines("/etc/resolv.conf")
 	for _, line := range lines {
 		if strings.HasPrefix(line, "nameserver") {
 			return strings.TrimSpace(strings.TrimPrefix(line, "nameserver"))
