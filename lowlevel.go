@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -47,6 +48,15 @@ func readFile(filename string) string {
 		return ""
 	}
 	return string(data)
+}
+
+func readLines(filename string) []string {
+	scanner := bufio.NewScanner(must(os.Open(filename)))
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines
 }
 
 func writeFile(filename string, content []byte) error {

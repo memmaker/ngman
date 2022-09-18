@@ -39,6 +39,16 @@ func getChunk(domain string) string {
 	return chunkString
 }
 
+func getResolver() string {
+	lines := readLines(path.Join("etc", "resolv.conf"))
+	for _, line := range lines {
+		if strings.HasPrefix(line, "nameserver") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "nameserver"))
+		}
+	}
+	return ""
+}
+
 func chunkExists(domain string) bool {
 	_, err := os.Stat(path.Join(config.SiteStorageDirectory, "chunks", domain))
 	return !errors.Is(err, fs.ErrNotExist)
@@ -193,5 +203,5 @@ func renderTemplate(data RenderContext) []byte {
 }
 
 func loadTemplates() {
-	rootTemplate = template.Must(template.New("nginx").Funcs(template.FuncMap{"getWildcardName": getWildcardName, "getChunk": getChunk, "chunkExists": chunkExists}).ParseFiles(config.TemplateFile))
+	rootTemplate = template.Must(template.New("nginx").Funcs(template.FuncMap{"getWildcardName": getWildcardName, "getChunk": getChunk, "chunkExists": chunkExists, "getResolver": getResolver}).ParseFiles(config.TemplateFile))
 }

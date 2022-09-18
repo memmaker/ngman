@@ -11,7 +11,8 @@ import (
 
 func addProxy(domain string, endpoint string, uriLocation string, headers map[string]string) bool {
 	ensureSiteExists(domain)
-
+	endpoint = strings.Replace(endpoint, "http://", "", 1)
+	endpoint = strings.Replace(endpoint, "https://", "", 1)
 	var site SiteInfo
 	newLocation := ReverseProxyLocation{
 		URLLocation: uriLocation,

@@ -54,15 +54,6 @@ if [ ! -f "$HOME"/bin/ngman ]; then
   printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '%s/.ngman/nginx-conf'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'podman exec ngx service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'podman exec ngx ssl-create.sh'" "$HOME" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
 fi
 
-if ! podman network exists podnet; then
-  echo "Creating podman network podnet"
-  podman network create podnet > /dev/null
-fi
-if podman container exists ngx; then
-  echo "Removing existing container ngx"
-  podman rm -f ngx > /dev/null
-fi
-
 if [ ! -f "$HOME"/.ngman/dnsprovider.env ] || [ ! -s "$HOME"/.ngman/dnsprovider.env ]; then
   echo "Could not find dnsprovider.env, please create it and add your dns provider credentials"
   echo "ACME DNS Challenge is currently disabled, no wildcard certificate support."
@@ -75,6 +66,17 @@ if [ ! -f "$HOME"/.ngman/dhparam.pem ]; then
   echo "Generating dhparam.pem for nginx https (this may take a while)"
   openssl dhparam -out "$HOME"/.ngman/dhparam.pem 4096
 fi
+
+
+if ! podman network exists podnet; then
+  echo "Creating podman network podnet"
+  podman network create podnet > /dev/null
+fi
+if podman container exists ngx; then
+  echo "Removing existing container ngx"
+  podman rm -f ngx > /dev/null
+fi
+
 
 echo "Starting container ngx"
 podman run \
