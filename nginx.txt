@@ -7,7 +7,10 @@
 
 {{define "proxy"}}
     location {{ .URLLocation }} {
-      resolver {{ getResolver }};
+      {{ $resolver := getResolver }}
+      {{ if $resolver }}
+        resolver {{ $resolver }};
+      {{ end }}
       set $proxy_server_location {{ .Endpoint }};
       proxy_pass http://$proxy_server_location;
       {{ range $key, $value := .Headers }}proxy_set_header {{ $key }} {{ $value }};

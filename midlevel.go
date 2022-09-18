@@ -40,13 +40,7 @@ func getChunk(domain string) string {
 }
 
 func getResolver() string {
-	lines := readLines("/etc/resolv.conf")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "nameserver") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "nameserver"))
-		}
-	}
-	return ""
+	return os.Getenv("NGMAN_PROXY_RESOLVER")
 }
 
 func chunkExists(domain string) bool {
