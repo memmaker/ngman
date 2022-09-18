@@ -30,7 +30,7 @@ These examples use a container that has been built from the [ngman/Nginx subdire
 ## Self-hosted HTTPS static content in three steps
 
     1. Setup a Web Server
-    curl -sL https://raw.githubusercontent.com/memmaker/ngman/v1.0.7/setup.sh | bash -s <your-acme-mail>
+    curl -sL https://raw.githubusercontent.com/memmaker/ngman/main/setup.sh | bash -s <your-acme-mail>
 
     2. Add a site with the respective domain
     ngman add-site <your-domain>
@@ -43,7 +43,7 @@ You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It W
 ## Self-hosted HTTPS reverse proxy in three steps
 
     1. Setup a Web Server
-    curl -sL https://raw.githubusercontent.com/memmaker/ngman/v1.0.7/setup.sh | bash -s <your-acme-mail>
+    curl -sL https://raw.githubusercontent.com/memmaker/ngman/main/setup.sh | bash -s <your-acme-mail>
 
     2. Startup your service container
     podman run --name webserver --network podnet -dt docker.io/library/httpd:alpine
