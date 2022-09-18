@@ -223,6 +223,16 @@ Example:
     DNS_PROVIDER=dode    
     DODE_TOKEN=12345678901234677
     
+### Setting DNS resolver for containers
+
+ngman will set the DNS resolver for all reverse proxy locations, if it detects the
+**NGMAN_PROXY_RESOLVER** environment variable.
+
+Example:
+
+    export NGMAN_PROXY_RESOLVER=10.89.1.1
+
+NOTE: This will be applied on write, so the environment variable must be set then.
 
 ## Standalone usage of ngman
 

@@ -95,3 +95,5 @@ podman run \
 
 RENEWCMD="podman exec ngx ssl-renew.sh"
 newcron "0 4 1 */2 * ${RENEWCMD} >/dev/null 2>&1"
+
+echo "export NGMAN_PROXY_RESOLVER=$(podman network inspect podnet | jq -r '.[0].plugins[0].ipam.ranges[0][0].gateway')" >> "$HOME"/.auto_source
