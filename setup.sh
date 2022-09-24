@@ -22,6 +22,7 @@ newcron () {
   fi
 }
 
+NGMAN_VERSION="v1.1.4"
 WEBROOT="$HOME/www"
 CERTROOT="$HOME/ssl"
 
@@ -60,6 +61,7 @@ if [ ! -f "$HOME"/keys/dhparam.pem ]; then
   openssl dhparam -out "$HOME"/keys/dhparam.pem "$DH_PARAM_BITS"
 fi
 
+podman unshare chown 1000 -R "$HOME"/.ngman
 
 if ! podman network exists podnet; then
   echo "Creating podman network podnet"
