@@ -7,7 +7,7 @@ FROM alpine:3.16
 ARG USERNAME=nginx
 ARG USER_UID=1000
 
-ARG NGMAN_VERSION="v1.1.5"
+ARG NGMAN_VERSION="v1.1.6"
 ARG HOME=/home/$USERNAME
 
 COPY ssl-* /usr/local/bin/
