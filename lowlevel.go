@@ -38,7 +38,7 @@ func ensureDirExists(dir string) {
 	_, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		fmt.Println("Directory '" + dir + "' does not exist, creating it")
-		try(os.Mkdir(dir, 0755))
+		try(os.Mkdir(dir, 0775))
 	}
 }
 
