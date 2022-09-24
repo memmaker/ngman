@@ -101,5 +101,5 @@ RENEWCMD="podman exec ngx ssl-renew.sh"
 newcron "0 4 1 */2 * ${RENEWCMD} >/dev/null 2>&1"
 
 # shellcheck disable=SC2028
-printf '#!/bin/zsh\npodman exec -it ngx sh --login -c "ngman $@"' > "$HOME"/bin/ngman
+printf '#!/bin/zsh\npodman exec -it ngx sh --login -c "ngman $*"' > "$HOME"/bin/ngman
 chmod +x "$HOME"/bin/ngman
