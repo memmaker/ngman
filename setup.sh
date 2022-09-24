@@ -47,7 +47,7 @@ else
   echo "Found dnsprovider.env, enabling ACME DNS Challenge and wildcard support"
 fi
 
-if [ ! -f "$HOME"/.ngman/dhparam.pem ]; then
+if [ ! -f "$HOME"/keys/dhparam.pem ]; then
   echo "Generating dhparam.pem for nginx https (this may take a while)"
   openssl dhparam -out "$HOME"/keys/dhparam.pem "$DH_PARAM_BITS"
 fi
