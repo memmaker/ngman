@@ -77,8 +77,8 @@ podman run \
   -e NGMAN_PROXY_RESOLVER="$PROXY_RESOLVER" \
   --env-file="$HOME"/.ngman/dnsprovider.env \
   --name ngx \
-  -p 80:80 \
-  -p 443:443 \
+  -p 80:1080 \
+  -p 443:10443 \
   -v "$HOME"/.ngman:/home/worker/.ngman \
   -v "$HOME"/keys/dhparam.pem:/etc/nginx/dhparam.pem \
   -v "$HOME"/nginx-conf:/etc/nginx/conf.d/ \
