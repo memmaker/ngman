@@ -60,5 +60,5 @@ func readLines(filename string) []string {
 }
 
 func writeFile(filename string, content []byte) error {
-	return os.WriteFile(filename, content, 2774)
+	return os.WriteFile(filename, content, 0774)
 }
