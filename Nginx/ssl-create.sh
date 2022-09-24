@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 WEBROOT="/var/www"
 
@@ -20,7 +20,7 @@ create_ssl_cert_dns () {
    lego -m "$ACMEMAIL" -a -d "$DOMAIN" --path /ssl --dns "$DNS_PROVIDER" run
 }
 
-if [[ -z "$DNS_PROVIDER" ]]; then
+if [ -z "$DNS_PROVIDER" ]; then
   create_ssl_cert_http "$1"
 else
   create_ssl_cert_dns "$1"

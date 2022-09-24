@@ -105,8 +105,8 @@ func tryGenerateCertificate(domain string, rootPath string, wildcard bool) {
 	}
 	commandLine := config.GenerateCertCommand + " " + domain + " " + rootPath
 	arguments := []string{"--login", "-c", commandLine}
-	fmt.Println("Running certificate generation command: bash " + strings.Join(arguments, " "))
-	cmd := exec.Command("bash", arguments...)
+	fmt.Println("Running certificate generation command: sh " + strings.Join(arguments, " "))
+	cmd := exec.Command("sh", arguments...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	try(cmd.Run())
@@ -114,7 +114,7 @@ func tryGenerateCertificate(domain string, rootPath string, wildcard bool) {
 
 func tryPostRunCommand() {
 	if config.PostRunCommand != "" {
-		cmd := exec.Command("bash", "--login", "-c", config.PostRunCommand)
+		cmd := exec.Command("sh", "--login", "-c", config.PostRunCommand)
 		// attach stdout and stderr to the current process
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

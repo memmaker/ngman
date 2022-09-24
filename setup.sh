@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 EMAIL="$1"
 
@@ -27,10 +27,10 @@ CERTROOT="$HOME/ssl"
 
 mkdir -p "$CERTROOT" "$WEBROOT"/_acme-challenges "$HOME"/.ngman "$HOME"/keys "$HOME"/nginx-conf
 
-if ! command -v podman &> /dev/null
+if ! command -v podman 1> /dev/null 2> /dev/null
 then
     echo "podman not found, installing it"
-    sudo apt-get update &> /dev/null && sudo apt-get install -y podman > /dev/null
+    sudo apt-get update 1> /dev/null 2> /dev/null && sudo apt-get install -y podman > /dev/null
 fi
 
 if [ ! -f /etc/sysctl.d/99-rootless.conf ]; then
@@ -79,7 +79,7 @@ podman run \
   --name ngx \
   -p 80:1080 \
   -p 443:10443 \
-  -v "$HOME"/.ngman:/home/worker/.ngman \
+  -v "$HOME"/.ngman:/home/nginx/.ngman \
   -v "$HOME"/keys/dhparam.pem:/etc/nginx/dhparam.pem \
   -v "$HOME"/nginx-conf:/etc/nginx/conf.d/ \
   -v "$CERTROOT":/ssl \

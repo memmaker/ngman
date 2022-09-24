@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 renew_ssl_cert_http () {
   DOMAIN="$1"
@@ -14,8 +14,8 @@ renew_ssl_cert_dns () {
 
 for keyfile in /ssl/certificates/*.key
 do
-    replaced="${keyfile/_/*}"
-    if [[ -z "$DNS_PROVIDER" ]]; then
+    replaced=$(echo "$keyfile" | tr '_' '*')
+    if [ -z "$DNS_PROVIDER" ]; then
       renew_ssl_cert_http "${replaced%.*}" >> /tmp/cert.log
     else
       renew_ssl_cert_dns "${replaced%.*}" >> /tmp/cert.log
