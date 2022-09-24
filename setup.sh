@@ -25,7 +25,7 @@ newcron () {
 WEBROOT="$HOME/www"
 CERTROOT="$HOME/ssl"
 
-mkdir -p "$CERTROOT" "$WEBROOT"/_acme-challenges "$HOME"/.ngman
+mkdir -p "$CERTROOT" "$WEBROOT"/_acme-challenges "$HOME"/.ngman "$HOME"/keys
 
 if ! command -v podman &> /dev/null
 then
