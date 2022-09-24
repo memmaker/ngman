@@ -44,7 +44,7 @@ if [ ! -f "$HOME"/.ngman/nginx.txt ]; then
 fi
 
 if [ ! -f "$HOME"/.ngman/config.toml ]; then
-    printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '/home/nginx/.ngman/sites'\nNginxSiteConfigDirectory = '/etc/nginx/conf.d'\nTemplateFile = '/home/nginx/.ngman/nginx.txt'\nPostRunCommand = 'service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'ssl-create.sh'" > "$HOME"/.ngman/config.toml
+    printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '/home/nginx/.ngman/sites'\nNginxSiteConfigDirectory = '/etc/nginx/conf.d'\nTemplateFile = '/home/nginx/.ngman/nginx.txt'\nPostRunCommand = 'nginx -s reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'ssl-create.sh'" > "$HOME"/.ngman/config.toml
 fi
 
 if [ ! -f "$HOME"/.ngman/dnsprovider.env ] || [ ! -s "$HOME"/.ngman/dnsprovider.env ]; then

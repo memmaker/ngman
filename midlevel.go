@@ -202,4 +202,6 @@ func renderTemplate(data RenderContext) []byte {
 
 func loadTemplates() {
 	rootTemplate = template.Must(template.New("nginx").Funcs(template.FuncMap{"getWildcardName": getWildcardName, "getChunk": getChunk, "chunkExists": chunkExists, "getResolver": getResolver}).ParseFiles(config.TemplateFile))
+	fmt.Println("Loaded template from " + config.TemplateFile)
+	fmt.Println("Defined templates: " + rootTemplate.DefinedTemplates())
 }
