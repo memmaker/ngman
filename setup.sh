@@ -60,7 +60,8 @@ if [ ! -f "$HOME"/keys/dhparam.pem ]; then
   openssl dhparam -out "$HOME"/keys/dhparam.pem "$DH_PARAM_BITS"
 fi
 
-podman unshare chown 1000 -R "$HOME"/.ngman "$HOME"/nginx-conf "$HOME"/ssl "$HOME"/www
+podman unshare chown 1000:0 -R "$HOME"/.ngman "$HOME"/nginx-conf "$HOME"/ssl "$HOME"/www
+podman unshare chmod g+rwxs -R "$HOME"/.ngman "$HOME"/nginx-conf "$HOME"/ssl "$HOME"/www
 
 if ! podman network exists podnet; then
   echo "Creating podman network podnet"
