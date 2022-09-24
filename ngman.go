@@ -16,15 +16,15 @@ func main() {
 	loadConfig()
 	if config.WebRootPath == "" {
 		printCheckConfig()
-		log.Fatal("Web root path is not set")
+		log.Fatal("Web root path is not set.")
 	}
 	if config.SiteStorageDirectory == "" {
 		printCheckConfig()
-		log.Fatal("Site storage directory is not set")
+		log.Fatal("Site storage directory is not set.")
 	}
 	if config.NginxSiteConfigDirectory == "" {
 		printCheckConfig()
-		log.Fatal("Nginx site config directory is not set")
+		log.Fatal("Nginx site config directory is not set.")
 	}
 	if !fileExists(config.TemplateFile) {
 		printCheckConfig()
@@ -33,6 +33,12 @@ func main() {
 	ensureDirExists(config.WebRootPath)
 	ensureDirExists(config.SiteStorageDirectory)
 	ensureDirExists(config.NginxSiteConfigDirectory)
+
+	if !dirExists(config.WebRootPath) || !dirExists(config.SiteStorageDirectory) || !dirExists(config.NginxSiteConfigDirectory) {
+		printCheckConfig()
+		log.Fatal("Could not ensure that all directories exist, check access rights.")
+	}
+
 	loadTemplates()
 
 	// get command line arguments
