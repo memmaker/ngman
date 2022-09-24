@@ -86,7 +86,11 @@ func certExists(domain string, useWildcard bool) bool {
 	} else {
 		certFileName = path.Join(config.CertificateRootPath, domain+".crt")
 	}
-	return fileExists(certFileName)
+	exists := fileExists(certFileName)
+	if exists {
+		fmt.Println("Using certificate " + certFileName)
+	}
+	return exists
 }
 
 func tryGenerateCertificate(domain string, rootPath string, wildcard bool) {

@@ -20,7 +20,7 @@ func must[V any](value V, err error) V {
 }
 func try(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Warning: " + err.Error())
 	}
 }
 
