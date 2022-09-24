@@ -57,6 +57,12 @@ if ! podman network exists podnet; then
   echo "Creating podman network podnet"
   podman network create podnet > /dev/null
 fi
+
+if podman image exists ghcr.io/memmaker/nginx:latest; then
+  echo "Pulling latest image"
+  podman pull ghcr.io/memmaker/nginx:latest
+fi
+
 if podman container exists ngx; then
   echo "Removing existing container ngx"
   podman rm -f ngx > /dev/null
