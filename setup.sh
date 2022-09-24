@@ -22,7 +22,6 @@ newcron () {
   fi
 }
 
-NGMAN_VERSION="v1.1.4"
 WEBROOT="$HOME/www"
 CERTROOT="$HOME/ssl"
 
@@ -41,7 +40,7 @@ if [ ! -f /etc/sysctl.d/99-rootless.conf ]; then
 fi
 
 if [ ! -f "$HOME"/.ngman/nginx.txt ]; then
-    curl -sL "https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt" > "$HOME"/.ngman/nginx.txt
+    curl -sL "https://raw.githubusercontent.com/memmaker/ngman/main/nginx.txt" > "$HOME"/.ngman/nginx.txt
 fi
 
 if [ ! -f "$HOME"/.ngman/config.toml ]; then
