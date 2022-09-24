@@ -38,7 +38,7 @@ func ensureDirExists(dir string) {
 	_, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		fmt.Println("Directory '" + dir + "' does not exist, creating it")
-		try(os.Mkdir(dir, 0775))
+		try(os.Mkdir(dir, 2774))
 	}
 }
 
@@ -60,5 +60,5 @@ func readLines(filename string) []string {
 }
 
 func writeFile(filename string, content []byte) error {
-	return os.WriteFile(filename, content, 0644)
+	return os.WriteFile(filename, content, 2774)
 }
