@@ -8,7 +8,7 @@ ARG USERNAME=nginx
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-ARG NGMAN_VERSION="v1.1.2"
+ARG NGMAN_VERSION="v1.1.4"
 ARG HOME=/home/$USERNAME
 
 COPY ssl-* /usr/local/bin/
@@ -27,10 +27,7 @@ USER $USERNAME
 
 COPY *.conf /etc/nginx/
 
-RUN mkdir -p "$HOME"/.ngman && \
-    curl -sL "https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt" > "$HOME"/.ngman/nginx.txt && \
-    printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '/etc/nginx/conf.d'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'ssl-create.sh'" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
-
+RUN mkdir -p "$HOME"/.ngman
 VOLUME /ssl /var/www /etc/nginx/conf.d "$HOME"/.ngman /etc/nginx/dhparam.pem
 
 EXPOSE 1080 10443

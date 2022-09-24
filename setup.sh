@@ -39,6 +39,14 @@ if [ ! -f /etc/sysctl.d/99-rootless.conf ]; then
   sudo sysctl --system
 fi
 
+if [ ! -f "$HOME"/.ngman/nginx.txt ]; then
+    curl -sL "https://github.com/memmaker/ngman/releases/download/${NGMAN_VERSION}/nginx.txt" > "$HOME"/.ngman/nginx.txt
+fi
+
+if [ ! -f "$HOME"/.ngman/config.toml ]; then
+    printf "CertificateRootPath = '/ssl/certificates'\nSiteStorageDirectory = '%s/.ngman/sites'\nNginxSiteConfigDirectory = '/etc/nginx/conf.d'\nTemplateFile = '%s/.ngman/nginx.txt'\nPostRunCommand = 'service nginx reload'\nWebRootPath = '/var/www'\nGenerateCertCommand = 'ssl-create.sh'" "$HOME" "$HOME" > "$HOME"/.ngman/config.toml
+fi
+
 if [ ! -f "$HOME"/.ngman/dnsprovider.env ] || [ ! -s "$HOME"/.ngman/dnsprovider.env ]; then
   echo "Could not find dnsprovider.env, please create it and add your dns provider credentials"
   echo "ACME DNS Challenge is currently disabled, no wildcard certificate support."
