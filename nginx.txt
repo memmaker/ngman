@@ -53,8 +53,8 @@ server {
       return 404;
     }
 
-    listen [::]:443 ssl http2;
-    listen 443 ssl http2;
+    listen [::]:10443 ssl http2;
+    listen 10443 ssl http2;
 
     ### SSL Certificates ###
 {{ if .Site.UseWildcardCert }}
@@ -97,8 +97,8 @@ server {
 }
 {{ end }}
 server {
-    listen 80;
-    listen [::]:80;
+    listen 1080;
+    listen [::]:1080;
     server_name {{ .Site.Domain }};
 
     location / {
