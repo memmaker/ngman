@@ -25,7 +25,7 @@ newcron () {
 WEBROOT="$HOME/www"
 CERTROOT="$HOME/ssl"
 
-mkdir -p "$WEBROOT" "$CERTROOT" "$HOME"/.ngman "$HOME"/keys "$HOME"/nginx-conf
+mkdir -p "$WEBROOT" "$CERTROOT" "$HOME"/.ngman "$HOME"/keys "$HOME"/bin "$HOME"/nginx-conf
 
 if ! command -v podman 1> /dev/null 2> /dev/null
 then
@@ -99,3 +99,7 @@ podman run \
 
 RENEWCMD="podman exec ngx ssl-renew.sh"
 newcron "0 4 1 */2 * ${RENEWCMD} >/dev/null 2>&1"
+
+# shellcheck disable=SC2028
+printf '#!/bin/zsh\npodman exec -it ngx sh --login -c "ngman $@"' > "$HOME"/bin/ngman
+chmod +x "$HOME"/bin/ngman
