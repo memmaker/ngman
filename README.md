@@ -63,7 +63,7 @@ You can add additional virtual hosts to your web server by using the respective 
     or
     ngman add-location <your-domain> /static /var/www/<your-domain>/static
     or
-    ngman add-proxy <your-domain> http://webserver:80
+    ngman add-proxy <your-domain> webserver:80
 
 These will
 
@@ -159,6 +159,20 @@ It will pass the respective domain name as the first argument.
     ngman write-all
 
 ## Advanced Usage
+
+### Enable automated startup on reboot
+
+This little script will create a systemd unit file, enabling automatic startup of the nginx container on reboot.
+
+    mkdir -p "$HOME"/.config/systemd/user
+
+    if [ ! -f "$HOME"/.config/systemd/user/nginx.service ]; then
+        echo "Creating systemd service for nginx"
+        podman generate systemd --restart-policy=always -t 1 ngx > "$HOME"/.config/systemd/user/nginx.service
+        systemctl --user enable nginx.service
+        sudo loginctl enable-linger
+    fi
+
 
 ### PHP-FPM Support
 
