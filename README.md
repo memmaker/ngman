@@ -27,6 +27,8 @@ It *should* also work correctly if you just pre-install podman via your package 
 In combination with [podman](https://podman.io/) and a pre-configured nginx container, you can do some pretty cool stuff.
 These examples use a container that has been built from the [ngman/Nginx subdirectory](https://github.com/memmaker/ngman/tree/main/Nginx).
 
+The container can be found here: https://github.com/memmaker/ngman/pkgs/container/nginx
+
 ## Self-hosted HTTPS static content in three steps
 
     1. Setup a Web Server
@@ -77,11 +79,11 @@ Alternatively you can also edit the configuration file directly:
 ## What does setup.sh do?
 
 1. Installs [podman](https://podman.io/)
-2. Installs [ngman](https://github.com/memmaker/ngman)
-3. Generate DH parameters for HTTPS
-4. Setup a container network with DNS support
-5. Start an pre-configured nginx container that includes [lego](https://github.com/go-acme/lego)
-6. Setup a cronjob for automatic SSL certificate renewal
+2. Generate DH parameters for HTTPS
+3. Set up permissions for the shared folders
+4. Set up a container network with DNS support
+5. Start a pre-configured nginx container that includes [lego](https://github.com/go-acme/lego)
+6. Set up a cronjob for automatic SSL certificate renewal
 
 ## Concepts of ngman
 
@@ -222,21 +224,18 @@ Example:
     root@dallas:~/.ngman# cat dnsprovider.env
     DNS_PROVIDER=dode    
     DODE_TOKEN=12345678901234677
-    
-### Setting DNS resolver for containers
 
-ngman will set the DNS resolver for all reverse proxy locations, if it detects the
-**NGMAN_PROXY_RESOLVER** environment variable.
+For your convenience, I have provided the script that I use for setting this up:
 
-Example:
+    mkdir -m 2774 "$HOME"/.ngman
+    printf "DNS_PROVIDER=dode\nDODE_TOKEN=12345678901234677" > "$HOME"/.ngman/dnsprovider.env
+    curl -sL https://raw.githubusercontent.com/memmaker/ngman/main/setup.sh | sh -s "$EMAIL"
 
-    export NGMAN_PROXY_RESOLVER=10.89.1.1
-
-NOTE: This will be applied on write, so the environment variable must be set then.
+You would have to replace the information of the DNS provider with your own.
 
 ## Standalone usage of ngman
 
-**NOTE: ALL THE FOLLOWING IS ALREADY INCLUDED AND AUTOMATED IN THE [setup.sh file](https://github.com/memmaker/ngman/blob/main/setup.sh) and [mmx23/nginx image](https://hub.docker.com/repository/docker/mmx23/nginx)**
+**NOTE: ALL THE FOLLOWING IS ALREADY INCLUDED AND AUTOMATED IN THE [setup.sh file](https://github.com/memmaker/ngman/blob/main/setup.sh) and [corresponding nginx container](https://github.com/memmaker/ngman/pkgs/container/nginx)**
 
 I suggest using [lego](https://github.com/go-acme/lego) in combination with [podman](https://podman.io/) for certificate generation.
 You can then do something like this
@@ -266,7 +265,8 @@ For certificate renewal, I suggest something like this
 
 Where renew_ssl_cert is the same as create_ssl_cert, but with the **run** command replaced by **renew**.
 
-## Installation
+
+### Installation
 
     ARCH=darwin_amd64;
     mkdir ~/.ngman > /dev/null 2>&1;
@@ -277,6 +277,18 @@ Where renew_ssl_cert is the same as create_ssl_cert, but with the **run** comman
     unzip ngman_${ARCH}.zip && rm ngman_${ARCH}.zip && \
     mv ngman_${ARCH} /usr/local/bin/ngman && popd
 
-## Uninstall
+### Uninstall
 
     rm -rf ~/.ngman && rm /usr/local/bin/ngman
+
+
+### Setting DNS resolver for containers
+
+ngman will set the DNS resolver for all reverse proxy locations, if it detects the
+**NGMAN_PROXY_RESOLVER** environment variable.
+
+Example:
+
+    export NGMAN_PROXY_RESOLVER=10.89.1.1
+
+NOTE: This will be applied on write, so the environment variable must be set then.
