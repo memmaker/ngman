@@ -51,7 +51,7 @@ You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It W
     podman run --name webserver --network podnet -dt docker.io/library/httpd:alpine
 
     3. Add your service to ngman
-    ngman add-proxy <your-domain> http://webserver:80
+    ngman add-proxy <your-domain> webserver:80
 
 You can now visit https://&lt;your-domain&gt;/ in the browser and will see "It Works".
 
