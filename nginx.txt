@@ -8,9 +8,9 @@
 {{define "proxy"}}
     location {{ .URLLocation }} {
       {{- $resolver := getResolver -}}  
-      {{- if $resolver -}}
-      resolver {{ $resolver }};
-      {{- end -}}
+      {{- if $resolver }}
+      resolver {{ $resolver }} ipv6=off;
+      {{- end }}
       set $proxy_server_location {{ .Endpoint }};
       proxy_pass http://$proxy_server_location;
       {{ range $key, $value := .Headers }}proxy_set_header {{ $key }} {{ $value }};
@@ -20,6 +20,7 @@
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $remote_addr;
       proxy_set_header Host $host;
+      proxy_set_header "Connection" "";
     }
 {{ end }}
 
